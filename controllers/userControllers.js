@@ -23,22 +23,29 @@ exports.getUsers = async(req, res)=>{
 }
 
 //find user by id
-exports.getuser = async(req, res) => {
+exports.getuser = async (req, res) => {
     try {
-        const {id} = req.params;
-        const user = await users.findById(id);
+      const email = req.body.email;
+      const user = await users.findOne({ email });
+      if (user) {
         res.status(200).json({
-            success:true,
-            user
-        })    
-    } catch (error) {
-        console.log(error);
+          success: true,
+          user,
+        });
+      } else {
         res.status(404).json({
-            success:false,
-            message:error.message
-        })
+          success: false,
+          user: null,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(404).json({
+        success: false,
+        message: error.message,
+      });
     }
-}
+  };
 
 //create user
 exports.createUser = async (req, res)=>{

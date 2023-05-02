@@ -6,7 +6,7 @@ const {getUsers, home, createUser, getuser} = require("../controllers/userContro
 router.get('/', home);
 router.get('/getUsers', getUsers);
 router.post('/createUser', createUser)
-router.get('/getuser', getuser)
+router.post('/getuser', getuser)
 
 
 module.exports = router;
