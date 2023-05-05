@@ -25,7 +25,6 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-
 //find user by email
 exports.getuser = async (req, res) => {
   try {
@@ -51,7 +50,6 @@ exports.getuser = async (req, res) => {
   }
 };
 
-
 //get zipcode
 
 exports.getZipCode = async (req, res) => {
@@ -60,70 +58,71 @@ exports.getZipCode = async (req, res) => {
     const zipcode = req.params.id;
     console.log(zipcode);
     const user = await zipcodepricing.findOne({ zipcode });
-    // console.log("USER", user);
-    let data = JSON.parse(JSON.stringify(user)); //convert user data to json
-    objkeys = Object.keys(data); // [13,15,27, _id, zip_code] from zipcode
-    // console.log(objkeys)
+    console.log("USER", user);
+    if (user) {
+      let pricingObj = JSON.parse(JSON.stringify(user)); //convert user data to json
+      // objkeys = Object.keys(data); // [13,15,27, _id, zip_code] from zipcode
+      // console.log(data)
 
+      // get all material data from db
+      const materialcollection = await materials.find();
+      let materialData = JSON.parse(JSON.stringify(materialcollection)); //convert materials data to json
+      // console.log(materialData)
 
-    // get all material data from db
-    const materialcollection = await materials.find();
-    let materialData = JSON.parse(JSON.stringify(materialcollection)); //convert materials data to json
-    // console.log(materialData)
+      // objkeys = Object.keys(data); // [13,15,27, _id, zip_code] from zipcode
+      // // console.log(objkeys)
 
-    // objkeys = Object.keys(data); // [13,15,27, _id, zip_code] from zipcode
-    // // console.log(objkeys)
+      //for getting only numbers
+      let distRes = [];
+      for (let item of materialData) {
+        let matId = item._id;
+        for (let obj of item.categories) {
+          // console.log("obj", obj._id)
+          let catId = obj._id;
+          console.log("////// over /////");
+          let key = 1;
+          let catArr = [];
 
-    //for getting only numbers
-    const zipcodeFinalPrice = [];
-    for(let i=0; i<objkeys.length; i++){
-      if( Number(objkeys[i])){
-        zipcodeFinalPrice.push(objkeys[i])
-      }
-    }
-    // console.log(zipcodeFinalPrice) // [13,15,27]
-    let finalData;
-    
-    for(let i=0; i<zipcodeFinalPrice.length; i++){
-      // console.log(zipcodeFinalPrice[i])
-      let data1 = Object.keys(data[zipcodeFinalPrice[i]]) //all material ids from pricings
-      // console.log(data1)
+          for (let data of obj.sizes) {
+            // console.log(data)
 
-      for(let i =0; i<data1.length; i++) {
-
-        let materialFoundObj = materialData.find((item) => item._id === data1[i])
-
-        if(materialFoundObj) {
-          let obj123 = {
-            name: materialFoundObj.name
+            let res = pricingObj[data][matId][catId];
+            console.log("RES", item.name, data + "GL. " + obj.name, res);
+            let newObj = {
+              key: key++ + "",
+              name: data + "GL. " + obj.name,
+              price: res,
+            };
+            catArr.push(newObj);
           }
-          
-          // console.log(materialFoundObj)
-            for(let j=0;j<materialFoundObj.categories.length; j++) {
-              if(data[zipcodeFinalPrice[i]] == '62dacd6df05cb1c8722ef034') {
-                console.log(data[zipcodeFinalPrice[i]])
-                console.log(materialFoundObj.categories[j]._id)
-
-              }
-              // let currentMaterialKey = data[zipcodeFinalPrice[i]][materialFoundObj.categories[j]._id]
-              // console.log(currentMaterialKey);
-            }
+          distRes.push(catArr);
         }
       }
+
+      console.log(distRes);
+      if (distRes.length > 0) {
+        res.status(200).json({
+          success: true,
+          materialData: distRes,
+          user,
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          materialData: [],
+        });
+      }
+    } else {
+      res.status(404).json({
+        success: false,
+        materialData: [],
+      });
     }
-
- 
-
-    
-    res.status(200).json({
-      success: true,
-      user,
-    });
   } catch (error) {
     console.log(error);
     res.status(404).json({
       success: false,
-      message: error.message,
+      materialData: [],
     });
   }
 };
