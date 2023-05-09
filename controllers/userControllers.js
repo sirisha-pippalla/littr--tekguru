@@ -61,28 +61,25 @@ exports.getZipCode = async (req, res) => {
     console.log("USER", user);
     if (user) {
       let pricingObj = JSON.parse(JSON.stringify(user)); //convert user data to json
-      // objkeys = Object.keys(data); // [13,15,27, _id, zip_code] from zipcode
-      // console.log(data)
+      
 
       // get all material data from db
       const materialcollection = await materials.find();
       let materialData = JSON.parse(JSON.stringify(materialcollection)); //convert materials data to json
-      // console.log(materialData)
-
-      // objkeys = Object.keys(data); // [13,15,27, _id, zip_code] from zipcode
-      // // console.log(objkeys)
+      console.log("pricingObj", pricingObj)
 
       //for getting only numbers
       let distRes = [];
       for (let item of materialData) {
         let matId = item._id;
+        console.log("MATID: ",matId)
         for (let obj of item.categories) {
           // console.log("obj", obj._id)
           let catId = obj._id;
           console.log("////// over /////");
           let key = 1;
+          
           let catArr = [];
-
           for (let data of obj.sizes) {
             // console.log(data)
 
